@@ -28,6 +28,7 @@ import org.bukkit.metadata.MetadataValue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -393,10 +394,11 @@ public class AFKPlusPlayer {
                 if (isAFK) {
                     boolean isAtPlayerRequirement;
                     int playersRequired = plugin.getConfig().getInt("ActionPlayerRequirement");
-                    if (playersRequired != 0) {
+                    if (playersRequired == 0) {
                         isAtPlayerRequirement = true;
                     } else {
-                        isAtPlayerRequirement = Bukkit.getOnlinePlayers().size() > playersRequired;
+                    	int onlinePlayerCount = Bukkit.getOnlinePlayers().toArray().length;
+                        isAtPlayerRequirement = onlinePlayerCount > playersRequired;
                     }
                     //Get the values that need to be met for warnings and action
                     Integer timeToWarning = plugin.perms.getPermissionValue(uuid, Permission.TimeToWarning.getPermission());
@@ -406,7 +408,7 @@ public class AFKPlusPlayer {
                     //Don't check if we need to warn the player if waring is disabled  or there is a permission error
                     if (!timeToWarning.equals(-1) && !timeToWarning.equals(0)) {
                         //Check for warning
-                        if (!isWarned && secondsSinceAFKStart >= timeToWarning) {
+                        if (!isWarned && secondsSinceAFKStart >= timeToWarning && isAtPlayerRequirement) {
                             Bukkit.getScheduler().runTask(plugin, this::warnPlayer);
                         }
                     }
